@@ -70,3 +70,16 @@ unique_project_submissions = getUniqueSet(projectsubmissions)
 print("unique_enrolled_students : "+str(len(unique_enrolled_students)))
 print("unique_daily_engagements : "+str(len(unique_daily_engagements)))
 print("unique_project_submissions: "+str(len(unique_project_submissions)))
+
+#for enroll in unique_enrolled_students:
+ #   if enroll not in unique_daily_engagements:
+  #      
+   #     print(enrollment for enrollment in enrollments if enrollment['account_key'] == enroll)
+    #    break
+count = 0
+for enrollment in enrollments:
+    student = enrollment['account_key']
+    if (student not in unique_daily_engagements and enrollment['join_date'] != enrollment['cancel_date']):
+        count=count + 1
+print(count)        
+          
