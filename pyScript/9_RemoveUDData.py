@@ -5,17 +5,11 @@ enrollment_filename= 'D:\Github\DAWithPython\pyScript\data\enrollments.csv'
 dailyEngagement_filename= 'D:\Github\DAWithPython\pyScript\data\daily_engagement.csv'
 projectsubmissions_filename= 'D:\Github\DAWithPython\pyScript\data\project_submissions.csv'
 
-#read data
 def readCsv(filename):
     with open(filename,'rb') as f:
         reader = unicodecsv.DictReader(f)
         return list(reader)
 
-enrollments=readCsv(enrollment_filename)
-dailyEngagements=readCsv(dailyEngagement_filename)
-projectsubmissions=readCsv(projectsubmissions_filename)
-
-#format data
 def parse_int(i):
     if i==None or i=='':
         return None
@@ -40,6 +34,10 @@ def getUniqueSet(di):
         uniqueSet.add(d['account_key'])
     return uniqueSet
 
+enrollments=readCsv(enrollment_filename)
+dailyEngagements=readCsv(dailyEngagement_filename)
+projectsubmissions=readCsv(projectsubmissions_filename)
+
 for enrollment in enrollments:
     enrollment['days_to_cancel'] = parse_int(enrollment['days_to_cancel'])
     enrollment['is_canceled'] = enrollment['is_canceled']=='True'
@@ -63,7 +61,6 @@ for projectsubmission in projectsubmissions:
 print("enrollments : "+str(len(enrollments)))
 print("dailyEngagements : "+str(len(dailyEngagements)))
 print("projectsubmissions: "+str(len(projectsubmissions)))
-
 #get unique data
 ##to get unique values in the dictionary
 unique_enrolled_students = getUniqueSet(enrollments)
@@ -75,8 +72,25 @@ print("unique_project_submissions: "+str(len(unique_project_submissions)))
         
 ##########THIS IS NEW HERE###################
 #to search how many enrolled students do not have any engagement data
-count = 0
+ud_Acct=set()
 for enrollment in enrollments:
+    if enrollment['is_udacity']:
+        ud_Acct.add(enrollment['account_key'])
+
+def removeUdAcct(di):
+    nonud=[]    
+    for d in di:
+        if d['account_key'] not in ud_Acct:
+           nonud.append(d)
+    return nonud
+
+nonud_enroll=removeUdAcct(enrollments)
+nonud_engagement=removeUdAcct(dailyEngagements)
+nonud_projSubmission=removeUdAcct(projectsubmissions)
+
+count = 0
+for enrollment in nonud_enroll:
     if enrollment['account_key'] not in unique_daily_engagements and enrollment['join_date'] != enrollment['cancel_date']:
         count=count + 1
-print(count)     
+print(count)
+        
