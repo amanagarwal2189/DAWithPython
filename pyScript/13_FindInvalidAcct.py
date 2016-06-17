@@ -98,7 +98,6 @@ for stud in nonud_enroll:
         if stud['account_key'] not in paid_students or date>paid_students[account_key]:
             paid_students[account_key]=date
 
-##########THIS IS NEW HERE###################
 #get paid students
 def remove_cancelled_reg(data):
     paid_data=[]
@@ -109,7 +108,7 @@ def remove_cancelled_reg(data):
 
 def within_one_week(join_date, engagement_date):
     time_delta = engagement_date - join_date
-    return time_delta.days < 7
+    return time_delta.days < 7 and time_delta.days >=0
 
 paid_enrollments = remove_cancelled_reg(nonud_enroll)
 paid_engagement = remove_cancelled_reg(nonud_engagement)
@@ -123,5 +122,33 @@ for engagement_record in paid_engagement:
     engagement_record_date = engagement_record['utc_date']
     if within_one_week(join_date, engagement_record_date):
         paid_engagement_in_first_week.append(engagement_record)
-len(paid_engagement_in_first_week)
 
+#get unique accountkeys and store each account key's engagement record in list
+#the dictionary will be {(account_key1:[engagement1, engagement2....]),...}
+from collections import defaultdict
+dict_account_engagements = defaultdict(list)
+for paid_engagement_rcrd in paid_engagement_in_first_week:
+    dict_account_engagements[paid_engagement_rcrd['account_key']].append(paid_engagement_rcrd) 
+
+#dict_acct_min stores the students (accountkey:total mins of video watched)
+dict_acct_min = {}
+for account_key, engagement_records in dict_account_engagements.items():
+    total_min=0
+    for record in engagement_records:
+        total_min += record['total_minutes_visited']
+    dict_acct_min[account_key] = total_min
+
+#list of all the total mins.. Just the values
+total_min = list(dict_acct_min.values())
+    
+import numpy as np
+print(np.mean(total_min))
+print(np.max(total_min))
+
+
+##########THIS IS NEW HERE###################
+#find surprising data points. the max in the llist was 10568.1 which is more than the number of minutes in a week
+#in a week there are 10080 mins. Hence we will come out with the records/account keys which have minutes more than that
+
+invalid_acc={key:value for key,value in dict_acct_min.items() if value>10080}
+print(invalid_acc)
